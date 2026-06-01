@@ -95,7 +95,7 @@ now start frondend: npm run dev
 go to the link: <private-ip>:3000
 
 
-## Phase 2
+## Phase 2 🐳 Docker Setup
 
 Create a docker file for Backend and Frontend
 
@@ -141,7 +141,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 
 
-Docker-compose file
+### Using Docker Compose (Recommended)
 
 version: '3.8'
 
@@ -164,8 +164,35 @@ services:
     depends_on:
       - backend
     
-    # Run the project
 
-    docker-compose up  --build
 
+### Run the project
+
+##### Build and start all services
+docker-compose up --build
+
+##### Stop services
+docker-compose down
+
+##### View logs
+docker-compose logs -f
+
+The docker-compose.yml file:
+
+Backend service: Runs on port 8000
+Frontend service: Runs on port 3000
+Network: Both services can communicate via service names
+API_BASE_URL: Frontend automatically connects to backend via http://backend:8000
+
+### Building Individual Docker Images
+
+# Backend
+cd backend
+docker build -t genai-backend .
+docker run -p 8000:8000 --env-file .env genai-backend
+
+# Frontend
+cd frontend
+docker build -t genai-frontend .
+docker run -p 3000:3000 genai-frontend
 
