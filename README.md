@@ -41,6 +41,8 @@
 
 ---
 
+## Phase 1
+
 ## 🚀 How It Works
 
 ### ⚡ Local Setup
@@ -91,3 +93,79 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 now start frondend: npm run dev
 
 go to the link: <private-ip>:3000
+
+
+## Phase 2
+
+Create a docker file for Backend and Frontend
+
+cd Backend:
+---------
+
+# backend/Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+cd Frontend
+----------------
+
+# frontend/Dockerfile
+
+# Build step
+FROM node:18-alpine as builder
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+# Runtime step
+FROM node:18-alpine
+WORKDIR /app
+
+COPY --from=builder /app .
+
+EXPOSE 3000
+CMD ["npm", "start"]
+
+
+Docker-compose file
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+    depends_on:
+      - backend
+    
+    # Run the project
+
+    docker-compose up  --build
+
+
